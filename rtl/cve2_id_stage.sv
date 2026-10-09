@@ -867,7 +867,7 @@ module cve2_id_stage #(
             rf_we_raw       = rf_we_dec & ex_valid_i;
           end
           if (illegal_insn_dec && XInterface) begin
-            coproc_done     = x_result_valid_i;
+            coproc_done     = x_result_valid_i & x_result_i.we;
             rf_we_raw       = x_result_valid_i & x_result_i.we;
           end
           if (multicycle_done) begin
