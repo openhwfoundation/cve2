@@ -225,6 +225,7 @@ module cve2_id_stage #(
   logic                rf_we_dec, rf_we_raw;
   logic                rf_ren_a, rf_ren_b, rf_ren_c;
   logic                rf_ren_a_dec, rf_ren_b_dec, rf_ren_c_dec;
+  logic [4:0]          rf_waddr_id;
 
   // Read enables should only be asserted for valid and legal instructions
   assign rf_ren_a = instr_valid_i & ~instr_fetch_err_i & ~illegal_insn_o & rf_ren_a_dec;
@@ -496,6 +497,14 @@ module cve2_id_stage #(
     endcase
   end
 
+  // Register file write address mux
+  always_comb begin : rf_waddr_id_mux
+    unique case ($bits(rf_wd_sel_e)'({rf_wdata_sel}))
+      RF_WD_COPROC: rf_waddr_id_o  = XInterface? x_result_i.rd : rf_waddr_id;
+      default:      rf_waddr_id_o  = rf_waddr_id;
+    endcase
+  end
+
   /////////////
   // Decoder //
   /////////////
@@ -542,7 +551,7 @@ module cve2_id_stage #(
     .rf_raddr_a_o(rf_raddr_a_o),
     .rf_raddr_b_o(rf_raddr_b_o),
     .rf_raddr_c_o(rf_raddr_c_o),
-    .rf_waddr_o  (rf_waddr_id_o),
+    .rf_waddr_o  (rf_waddr_id),
     .rf_ren_a_o  (rf_ren_a_dec),
     .rf_ren_b_o  (rf_ren_b_dec),
     .rf_ren_c_o  (rf_ren_c_dec),
