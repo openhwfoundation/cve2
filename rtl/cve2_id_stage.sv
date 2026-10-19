@@ -301,21 +301,21 @@ module cve2_id_stage #(
 
     logic scoreboard_free;
 
-    // The cve2 can issue up to X_INSTR_INFLIGHT instructions over the X-IF 
+    // The cve2 can issue up to X_INSTR_INFLIGHT instructions over the X-IF
     // without waiting for their completion.
     //
-    // Each issued instruction, identified by a unique ID, sets its corresponding 
-    // scoreboard bit to `1`. When the instruction completes, that bit is cleared 
+    // Each issued instruction, identified by a unique ID, sets its corresponding
+    // scoreboard bit to `1`. When the instruction completes, that bit is cleared
     // back to `0`.
     //
-    // The cve2 always issues instructions in order, but the co-processor may 
+    // The cve2 always issues instructions in order, but the co-processor may
     // complete (commit) them out of order.
     //
-    // Once the scoreboard has issued the X_INSTR_INFLIGHT-th instruction, 
+    // Once the scoreboard has issued the X_INSTR_INFLIGHT-th instruction,
     // the instruction ID counter wraps around to 0.
     //
-    // If the previous instruction with ID 0 has already completed 
-    // (i.e., scoreboard[0] == 0), the cve2 can issue a new instruction with ID 0. 
+    // If the previous instruction with ID 0 has already completed
+    // (i.e., scoreboard[0] == 0), the cve2 can issue a new instruction with ID 0.
     // Otherwise, it waits for the instruction with ID 0 to finish before reusing it.
     //
     // This behavior applies similarly to all other instruction IDs.
@@ -987,7 +987,13 @@ module cve2_id_stage #(
         RF_WD_EX,
         RF_WD_CSR,
         RF_WD_COPROC})
-  end 
+    `ASSERT(CVE2XifResultHartIdValid, x_result_valid_i |-> (x_result_i.hartid == hart_id_i))
+    `ASSERT(CVE2XifResultInstrIdValid, x_result_valid_i |->
+        (gen_xif.scoreboard_q[x_result_i.id] ||
+         (x_issue_valid_o && x_issue_ready_i && x_issue_resp_i.accept &&
+          (x_issue_req_o.id == x_result_i.id))))
+    `ASSERT_FINAL(CVE2XifInstrInflightPending, gen_xif.scoreboard_q === '0)
+  end
   else begin : no_gen_asserts_xif
     `ASSERT(IbexRegfileWdataSelValid, instr_valid_i |-> rf_wdata_sel inside {
         RF_WD_EX,

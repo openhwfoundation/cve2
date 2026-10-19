@@ -313,4 +313,23 @@ module cve2_top import cve2_pkg::*; #(
   `ASSERT_KNOWN(CVE2IrqX, {irq_software_i, irq_timer_i, irq_external_i, irq_fast_i, irq_nm_i})
 
   `ASSERT_KNOWN(CVE2DebugReqX, debug_req_i)
+
+  // CV-X-IF
+  // Issue
+  `ASSERT_KNOWN(CVE2XifIssueValidX, x_issue_valid_o)
+  `ASSERT_KNOWN_IF(CVE2XifIssueReqPayloadX, x_issue_req_o, x_issue_valid_o)
+
+  `ASSERT_KNOWN(CVE2XifIssueReadyX, x_issue_ready_i)
+  `ASSERT_KNOWN_IF(CVE2XifIssueRespPayloadX, x_issue_resp_i, x_issue_ready_i)
+
+  // Register
+  `ASSERT_KNOWN_IF(CVE2XifRegisterPayloadX, x_register_o, x_issue_valid_o)
+
+  // Commit
+  `ASSERT_KNOWN(CVE2XifCommitValidX, x_commit_valid_o)
+  `ASSERT_KNOWN_IF(CVE2XifCommitPayloadX, x_commit_o, x_commit_valid_o)
+
+  // Result
+  `ASSERT_KNOWN(CVE2XifResultValidX, x_result_valid_i)
+  `ASSERT_KNOWN_IF(CVE2XifResultPayloadX, x_result_i, x_result_valid_i)
 endmodule
